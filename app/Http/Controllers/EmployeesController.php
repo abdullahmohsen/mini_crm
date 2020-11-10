@@ -8,6 +8,7 @@ use App\UserLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class EmployeesController extends Controller
 {
@@ -37,7 +38,7 @@ class EmployeesController extends Controller
     	$data = $request->all();
 
     	$max_role_count = Role::select('*')->count();
-    	\Validator::make($data, [
+    	Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],

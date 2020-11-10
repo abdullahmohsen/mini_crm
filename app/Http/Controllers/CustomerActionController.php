@@ -3,43 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\CustomerAction;
-use App\EmployeeAssignation;
-use Illuminate\Http\Request;
+use App\Http\Requests\ActionRequest;
+
 
 class CustomerActionController extends Controller
 {
-    public function index()
-    {
-        
-    }
+    public function actionName(ActionRequest $request) {
 
-    public function create()
-    {
-        //
-    }
+        $action = new CustomerAction();
+        $action->action_name = $request->action_name;
+        $action->customer_id = $request->customer_id;
+        $action->record = $request->record;
+        $action->save();
 
-    public function store(Request $request)
-    {
-        //
-    }
-
-    public function show(CustomerAction $customerAction)
-    {
-        //
-    }
-
-    public function edit(CustomerAction $customerAction)
-    {
-        //
-    }
-
-    public function update(Request $request, CustomerAction $customerAction)
-    {
-        //
-    }
-
-    public function destroy(CustomerAction $customerAction)
-    {
-        //
+        return response()->json(['success'=>'Your action Created successfully.']);
     }
 }

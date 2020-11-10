@@ -10,6 +10,8 @@ use App\UserLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+
 
 class CustomersController extends Controller
 {
@@ -19,57 +21,48 @@ class CustomersController extends Controller
     }
 
     public function index() {
-        $customer_role_id = Role::where('name', 'customer')->first()->id;
-        $customers = User::where('role_id', $customer_role_id)->get();
-
-
-        // $customer_id = ;
-
         $customer_action = CustomerAction::get();
-        // return $customer_action = CustomerAction::where('customer_id', $customer->id)->get();
+        $role = Auth::user()->role->name;
+
+        if($role == 'super_admin') {
+	        $customer_role_id = Role::where('name', 'customer')->first()->id; //role_id for customer
+    	    $customer_employee = User::where('role_id', $customer_role_id)->get(); //get all data of all customer
+        } elseif ($role == 'employee') {
+            $employee_role_id = Auth::user()->id; //employee id
+            $customers_id = EmployeeAssignation::where('employee_id', $employee_role_id)->get('customer_id'); //get all customers of employee
+            $customer_employee = User::whereIn('id', $customers_id)->get();
+        }
+
 
         return view('customers.index')->with([
-        	'customers' => $customers,
+        	'customers' => $customer_employee,
         	'customer_action' => $customer_action,
         ]);
     }
 
     public function create() {
 
-        $user = User::find(Auth::user()->id);
-        $role = $user->role->name;
+        $role = Auth::user()->role->name;
 
         if($role == 'super_admin') {
 	        $employee_role_id = Role::where('name', 'employee')->first()->id; //role_id for employee
     	    $employees = User::where('role_id', $employee_role_id)->get()->toArray(); //get all data of all employee
         } elseif ($role == 'employee') {
-            $employee_role_id = User::find(Auth::user()->id)->id;
-    	    $employees = User::where('id', $employee_role_id)->first()->toArray(); //get all data of all employee
+            $employee_role_id = Auth::user()->id;
+            $employees = User::where('id', $employee_role_id)->get()->toArray(); //get all data of all employee
         }
-        $user = User::find(Auth::user()->id); //user data login
 
         return view('customers.create')->with([
-        	'user' => $user,
+        	'user' => Auth::user(),
         	'employees' => $employees,
         ]);
     }
-
-    // public function create() {
-    // 	$employee_role_id = Role::where('name', 'employee')->first()->id;
-    // 	$employees = User::where('role_id', $employee_role_id)->get()->toArray();
-    // 	$user = User::find(Auth::user()->id);
-
-    //     return view('customers.create')->with([
-    //     	'user' => $user,
-    //     	'employees' => $employees,
-    //     ]);
-    // }
 
     public function store(Request $request) {
     	$data = $request->all();
 
     	$max_role_count = Role::select('*')->count();
-    	\Validator::make($data, [
+    	Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
@@ -85,7 +78,7 @@ class CustomersController extends Controller
             'role_id' => $customer_role_id,
         ]);
 
-        $user = User::find(\Auth::user()->id);
+        $user = User::find(Auth::user()->id);
         $role = $user->role->name;
 
         // Assignation section
@@ -106,8 +99,8 @@ class CustomersController extends Controller
         $user_log->user_id = Auth::user()->id;
         $user_log->action_name = 'create customer';
         $user_log->payload = "
-        	Customer ID (" . $customer->id . ")<br>
-        	Customer name: (" . $customer->name . ")<br>
+        	Customer ID (" . $customer->id . ") -
+        	Customer name: (" . $customer->name . ")
         	Assigned to Employee ID (". $assign_to_employee->id . ") -
         	Employee name: (". $assign_to_employee->name . ")
         ";
@@ -115,4 +108,10 @@ class CustomersController extends Controller
 
         return redirect()->route('home');
     }
+
 }
+
+
+
+
+
