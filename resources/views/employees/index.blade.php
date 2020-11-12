@@ -9,10 +9,13 @@
 
         <div class="card-body">
           <div>
+            @if(count($employees))
             @foreach($employees as $employee)
-            <p>Employee name: <b>{{ $employee->name }}</b>, This email is: <b>{{ $employee->email }}</b></p>
+            <p>Employee name: <b>{{ $employee->name }}</b>, His email is: <b>{{ $employee->email }}</b></p>
             @endforeach
-            <p></p>
+            @else
+            <p>There's no employees in our database, <a href="{{ route('employees.create') }}">Create new</a></p>
+            @endif
           </div>
         </div>
       </div>

@@ -22,9 +22,9 @@ class CreateUsersTable extends Migration
         });
 
         $user = new User;
-        $user->name = 'Abdallah';
-        $user->email = 'abdallah@gmail.com';
-        $user->password = Hash::make('123456789');
+        $user->name = 'Admin';
+        $user->email = 'super_admin@app.com';
+        $user->password = Hash::make('123456');
         $user->role_id = Role::where('name', 'super_admin')->first()->id;
         $user->save();
     }
