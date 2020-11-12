@@ -4,13 +4,12 @@ namespace App\Http\Controllers;
 
 use App\CustomerAction;
 use App\EmployeeAssignation;
+use App\Http\Requests\CustomerRequest;
 use App\Role;
 use App\User;
 use App\UserLog;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
 
 class CustomersController extends Controller
@@ -58,17 +57,9 @@ class CustomersController extends Controller
         ]);
     }
 
-    public function store(Request $request) {
-    	$data = $request->all();
+    public function store(CustomerRequest $request) {
 
-    	$max_role_count = Role::select('*')->count();
-    	Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role_id' => ['required', 'integer', "min:1", "max:$max_role_count"],
-            'assignation_employee_id' => ['required', 'integer', "min:1"],
-        ]);
+        $data = $request->all();
 
         $customer_role_id = Role::where('name', 'customer')->first()->id;
         $customer = User::create([
@@ -105,10 +96,8 @@ class CustomersController extends Controller
         	Employee name: (". $assign_to_employee->name . ")
         ";
         $user_log->save();
-
         return redirect()->route('home');
     }
-
 }
 
 

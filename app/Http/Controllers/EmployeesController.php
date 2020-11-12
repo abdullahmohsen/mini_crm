@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\EmployeeRequest;
 use App\Role;
 use App\User;
 use App\UserLog;
@@ -34,16 +35,8 @@ class EmployeesController extends Controller
         ]);
     }
 
-    public function store(Request $request) {
+    public function store(EmployeeRequest $request) {
     	$data = $request->all();
-
-    	$max_role_count = Role::select('*')->count();
-    	Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role_id' => ['required', 'integer', "min:1", "max:$max_role_count"],
-        ]);
 
         $employee_role_id = Role::where('name', 'employee')->first()->id;
         $employee = User::create([
